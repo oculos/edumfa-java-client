@@ -1,5 +1,10 @@
 # Changelog
 
+### v1.3.0 - 15 Oct 2024
+
+* Fork this client from PrivacyIDEA into eduMFA
+
+
 ### v1.2.2 - 5 Mar 2024
 
 * Fixed a problem with the threadpool where thread would not time out and accumulate over time

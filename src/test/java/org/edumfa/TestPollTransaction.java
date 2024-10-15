@@ -1,20 +1,27 @@
 /*
- * Copyright 2023 NetKnights GmbH - nils.behlen@netknights.it
- * lukas.matusiewicz@netknights.it
- * - Modified
- * <p>
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License here:
- * <a href="http://www.apache.org/licenses/LICENSE-2.0">License</a>
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package org.privacyidea;
+ * * License:  AGPLv3
+ * * This file is part of eduMFA java client. eduMFA java client is a fork of privacyIDEA java client.
+ * * Copyright (c) 2024 eduMFA Project-Team
+ * * Previous authors of the PrivacyIDEA java client:
+ * *
+ * * NetKnights GmbH
+ * * nils.behlen@netknights.it
+ * * lukas.matusiewicz@netknights.it
+ * *
+ * * This code is free software; you can redistribute it and/or
+ * * modify it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE
+ * * License as published by the Free Software Foundation; either
+ * * version 3 of the License, or any later version.
+ * *
+ * * This code is distributed in the hope that it will be useful,
+ * * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * * GNU AFFERO GENERAL PUBLIC LICENSE for more details.
+ * *
+ * * You should have received a copy of the GNU Affero General Public
+ * * License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * */
+package org.edumfa;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -35,7 +42,7 @@ import static org.junit.Assert.assertTrue;
 public class TestPollTransaction
 {
     private ClientAndServer mockServer;
-    private PrivacyIDEA privacyIDEA;
+    private EduMFA eduMFA;
     private final String username = "testuser";
 
     @Before
@@ -43,9 +50,9 @@ public class TestPollTransaction
     {
         mockServer = ClientAndServer.startClientAndServer(1080);
 
-        privacyIDEA = PrivacyIDEA.newBuilder("https://127.0.0.1:1080", "test")
+        eduMFA = EduMFA.newBuilder("https://127.0.0.1:1080", "test")
                                  .sslVerify(false)
-                                 .logger(new PILogImplementation())
+                                 .logger(new EMLogImplementation())
                                  .simpleLogger(System.out::println)
                                  .build();
     }
@@ -64,7 +71,7 @@ public class TestPollTransaction
                                        .withBody(Utils.pollGetChallenges())
                                        .withDelay(TimeUnit.MILLISECONDS, 50));
 
-        PIResponse initialResponse = privacyIDEA.validateCheck(username, null);
+        EMResponse initialResponse = eduMFA.validateCheck(username, null);
 
         // Check the triggered challenges - the other things are already tested in org.privacyidea.TestOTP
         List<Challenge> challenges = initialResponse.multichallenge;
@@ -117,18 +124,18 @@ public class TestPollTransaction
         // Polling is controlled by the code using the sdk
         for (int i = 0; i < 2; i++)
         {
-            assertFalse(privacyIDEA.pollTransaction(initialResponse.transactionID));
+            assertFalse(eduMFA.pollTransaction(initialResponse.transactionID));
             Thread.sleep(500);
         }
 
         // Set the server to respond with true
         setPollTransactionResponse(true, 1);
-        assertTrue(privacyIDEA.pollTransaction(initialResponse.transactionID));
+        assertTrue(eduMFA.pollTransaction(initialResponse.transactionID));
 
         // Now the transaction has to be finalized manually
         setFinalizationResponse(initialResponse.transactionID);
 
-        PIResponse response = privacyIDEA.validateCheck(username, null, initialResponse.transactionID);
+        EMResponse response = eduMFA.validateCheck(username, null, initialResponse.transactionID);
         assertTrue(response.value);
 
         //push side functions

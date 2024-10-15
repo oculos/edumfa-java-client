@@ -1,20 +1,27 @@
 /*
- * Copyright 2023 NetKnights GmbH - nils.behlen@netknights.it
- * lukas.matusiewicz@netknights.it
- * - Modified
- * <p>
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License here:
- * <a href="http://www.apache.org/licenses/LICENSE-2.0">License</a>
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package org.privacyidea;
+ * * License:  AGPLv3
+ * * This file is part of eduMFA java client. eduMFA java client is a fork of privacyIDEA java client.
+ * * Copyright (c) 2024 eduMFA Project-Team
+ * * Previous authors of the PrivacyIDEA java client:
+ * *
+ * * NetKnights GmbH
+ * * nils.behlen@netknights.it
+ * * lukas.matusiewicz@netknights.it
+ * *
+ * * This code is free software; you can redistribute it and/or
+ * * modify it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE
+ * * License as published by the Free Software Foundation; either
+ * * version 3 of the License, or any later version.
+ * *
+ * * This code is distributed in the hope that it will be useful,
+ * * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * * GNU AFFERO GENERAL PUBLIC LICENSE for more details.
+ * *
+ * * You should have received a copy of the GNU Affero General Public
+ * * License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * */
+package org.edumfa;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -29,52 +36,52 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.privacyidea.PIConstants.ASSERTIONCLIENTEXTENSIONS;
-import static org.privacyidea.PIConstants.ATTRIBUTES;
-import static org.privacyidea.PIConstants.AUTHENTICATION;
-import static org.privacyidea.PIConstants.AUTHENTICATORDATA;
-import static org.privacyidea.PIConstants.CLIENTDATA;
-import static org.privacyidea.PIConstants.CLIENT_MODE;
-import static org.privacyidea.PIConstants.CODE;
-import static org.privacyidea.PIConstants.CREDENTIALID;
-import static org.privacyidea.PIConstants.DETAIL;
-import static org.privacyidea.PIConstants.ERROR;
-import static org.privacyidea.PIConstants.ID;
-import static org.privacyidea.PIConstants.IMAGE;
-import static org.privacyidea.PIConstants.INFO;
-import static org.privacyidea.PIConstants.JSONRPC;
-import static org.privacyidea.PIConstants.MAXFAIL;
-import static org.privacyidea.PIConstants.MESSAGE;
-import static org.privacyidea.PIConstants.MESSAGES;
-import static org.privacyidea.PIConstants.MULTI_CHALLENGE;
-import static org.privacyidea.PIConstants.OTPLEN;
-import static org.privacyidea.PIConstants.PREFERRED_CLIENT_MODE;
-import static org.privacyidea.PIConstants.REALMS;
-import static org.privacyidea.PIConstants.RESULT;
-import static org.privacyidea.PIConstants.SERIAL;
-import static org.privacyidea.PIConstants.SIGNATURE;
-import static org.privacyidea.PIConstants.SIGNATUREDATA;
-import static org.privacyidea.PIConstants.STATUS;
-import static org.privacyidea.PIConstants.TOKEN;
-import static org.privacyidea.PIConstants.TOKENS;
-import static org.privacyidea.PIConstants.TOKEN_TYPE_U2F;
-import static org.privacyidea.PIConstants.TOKEN_TYPE_WEBAUTHN;
-import static org.privacyidea.PIConstants.TRANSACTION_ID;
-import static org.privacyidea.PIConstants.TYPE;
-import static org.privacyidea.PIConstants.U2F_SIGN_REQUEST;
-import static org.privacyidea.PIConstants.USERHANDLE;
-import static org.privacyidea.PIConstants.USERNAME;
-import static org.privacyidea.PIConstants.VALUE;
-import static org.privacyidea.PIConstants.VERSION_NUMBER;
-import static org.privacyidea.PIConstants.WEBAUTHN_SIGN_REQUEST;
+import static org.edumfa.EMConstants.ASSERTIONCLIENTEXTENSIONS;
+import static org.edumfa.EMConstants.ATTRIBUTES;
+import static org.edumfa.EMConstants.AUTHENTICATION;
+import static org.edumfa.EMConstants.AUTHENTICATORDATA;
+import static org.edumfa.EMConstants.CLIENTDATA;
+import static org.edumfa.EMConstants.CLIENT_MODE;
+import static org.edumfa.EMConstants.CODE;
+import static org.edumfa.EMConstants.CREDENTIALID;
+import static org.edumfa.EMConstants.DETAIL;
+import static org.edumfa.EMConstants.ERROR;
+import static org.edumfa.EMConstants.ID;
+import static org.edumfa.EMConstants.IMAGE;
+import static org.edumfa.EMConstants.INFO;
+import static org.edumfa.EMConstants.JSONRPC;
+import static org.edumfa.EMConstants.MAXFAIL;
+import static org.edumfa.EMConstants.MESSAGE;
+import static org.edumfa.EMConstants.MESSAGES;
+import static org.edumfa.EMConstants.MULTI_CHALLENGE;
+import static org.edumfa.EMConstants.OTPLEN;
+import static org.edumfa.EMConstants.PREFERRED_CLIENT_MODE;
+import static org.edumfa.EMConstants.REALMS;
+import static org.edumfa.EMConstants.RESULT;
+import static org.edumfa.EMConstants.SERIAL;
+import static org.edumfa.EMConstants.SIGNATURE;
+import static org.edumfa.EMConstants.SIGNATUREDATA;
+import static org.edumfa.EMConstants.STATUS;
+import static org.edumfa.EMConstants.TOKEN;
+import static org.edumfa.EMConstants.TOKENS;
+import static org.edumfa.EMConstants.TOKEN_TYPE_U2F;
+import static org.edumfa.EMConstants.TOKEN_TYPE_WEBAUTHN;
+import static org.edumfa.EMConstants.TRANSACTION_ID;
+import static org.edumfa.EMConstants.TYPE;
+import static org.edumfa.EMConstants.U2F_SIGN_REQUEST;
+import static org.edumfa.EMConstants.USERHANDLE;
+import static org.edumfa.EMConstants.USERNAME;
+import static org.edumfa.EMConstants.VALUE;
+import static org.edumfa.EMConstants.VERSION_NUMBER;
+import static org.edumfa.EMConstants.WEBAUTHN_SIGN_REQUEST;
 
 public class JSONParser
 {
-    private final PrivacyIDEA privacyIDEA;
+    private final EduMFA edumfa;
 
-    public JSONParser(PrivacyIDEA privacyIDEA)
+    public JSONParser(EduMFA edumfa)
     {
-        this.privacyIDEA = privacyIDEA;
+        this.edumfa = edumfa;
     }
 
     /**
@@ -98,7 +105,7 @@ public class JSONParser
         }
         catch (JsonSyntaxException e)
         {
-            privacyIDEA.error(e.getMessage());
+            edumfa.error(e.getMessage());
             return json;
         }
 
@@ -125,31 +132,31 @@ public class JSONParser
                 }
                 catch (Exception e)
                 {
-                    privacyIDEA.error("Response did not contain an authorization token: " + formatJson(serverResponse));
+                    edumfa.error("Response did not contain an authorization token: " + formatJson(serverResponse));
                 }
             }
         }
         else
         {
-            privacyIDEA.error("/auth response was empty or null!");
+            edumfa.error("/auth response was empty or null!");
         }
         return null;
     }
 
     /**
-     * Parse the response of the server into a PIResponse object.
+     * Parse the response of the server into a EMResponse object.
      *
      * @param serverResponse response of the server
-     * @return PIResponse or null if input is empty
+     * @return EMResponse or null if input is empty
      */
-    public PIResponse parsePIResponse(String serverResponse)
+    public EMResponse parseEMResponse(String serverResponse)
     {
         if (serverResponse == null || serverResponse.isEmpty())
         {
             return null;
         }
 
-        PIResponse response = new PIResponse();
+        EMResponse response = new EMResponse();
         response.rawMessage = serverResponse;
 
         JsonObject obj;
@@ -159,12 +166,12 @@ public class JSONParser
         }
         catch (JsonSyntaxException e)
         {
-            privacyIDEA.error(e);
+            edumfa.error(e);
             return response;
         }
 
         response.id = getInt(obj, ID);
-        response.piVersion = getString(obj, VERSION_NUMBER);
+        response.emVersion = getString(obj, VERSION_NUMBER);
         response.signature = getString(obj, SIGNATURE);
         response.jsonRPCVersion = getString(obj, JSONRPC);
 
@@ -186,7 +193,7 @@ public class JSONParser
             if (errElem != null && !errElem.isJsonNull())
             {
                 JsonObject errObj = result.getAsJsonObject(ERROR);
-                response.error = new PIError(getInt(errObj, CODE), getString(errObj, MESSAGE));
+                response.error = new EMError(getInt(errObj, CODE), getString(errObj, MESSAGE));
                 return response;
             }
         }
@@ -316,7 +323,7 @@ public class JSONParser
         }
         catch (JsonSyntaxException e)
         {
-            privacyIDEA.error(e);
+            edumfa.error(e);
             return ret;
         }
 
@@ -362,7 +369,7 @@ public class JSONParser
         }
         catch (JsonSyntaxException e)
         {
-            privacyIDEA.error(e);
+            edumfa.error(e);
             return info;
         }
 
@@ -442,7 +449,7 @@ public class JSONParser
             if (errElem != null && !errElem.isJsonNull())
             {
                 JsonObject errObj = result.getAsJsonObject(ERROR);
-                rinfo.error = new PIError(getInt(errObj, CODE), getString(errObj, MESSAGE));
+                rinfo.error = new EMError(getInt(errObj, CODE), getString(errObj, MESSAGE));
                 return rinfo;
             }
 
@@ -480,7 +487,7 @@ public class JSONParser
         }
         catch (JsonSyntaxException | ClassCastException e)
         {
-            privacyIDEA.error(e);
+            edumfa.error(e);
             return rinfo;
         }
 
@@ -504,7 +511,7 @@ public class JSONParser
         }
         catch (JsonSyntaxException e)
         {
-            privacyIDEA.error("WebAuthn sign response has the wrong format: " + e.getLocalizedMessage());
+            edumfa.error("WebAuthn sign response has the wrong format: " + e.getLocalizedMessage());
             return null;
         }
 
@@ -544,7 +551,7 @@ public class JSONParser
         }
         catch (JsonSyntaxException e)
         {
-            privacyIDEA.error("U2F sign response has the wrong format: " + e.getLocalizedMessage());
+            edumfa.error("U2F sign response has the wrong format: " + e.getLocalizedMessage());
             return null;
         }
 
@@ -582,8 +589,8 @@ public class JSONParser
         catch (Exception e)
         {
             // Just catch the exception instead of checking to get some log
-            privacyIDEA.error("Cannot get " + name + " from JSON");
-            privacyIDEA.error(e);
+            edumfa.error("Cannot get " + name + " from JSON");
+            edumfa.error(e);
         }
         return primitive;
     }

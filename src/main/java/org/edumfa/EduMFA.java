@@ -1,20 +1,27 @@
 /*
- * Copyright 2023 NetKnights GmbH - nils.behlen@netknights.it
- * lukas.matusiewicz@netknights.it
- * - Modified
- * <p>
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License here:
- * <a href="http://www.apache.org/licenses/LICENSE-2.0">License</a>
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package org.privacyidea;
+ * * License:  AGPLv3
+ * * This file is part of eduMFA java client. eduMFA java client is a fork of privacyIDEA java client.
+ * * Copyright (c) 2024 eduMFA Project-Team
+ * * Previous authors of the PrivacyIDEA java client:
+ * *
+ * * NetKnights GmbH
+ * * nils.behlen@netknights.it
+ * * lukas.matusiewicz@netknights.it
+ * *
+ * * This code is free software; you can redistribute it and/or
+ * * modify it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE
+ * * License as published by the Free Software Foundation; either
+ * * version 3 of the License, or any later version.
+ * *
+ * * This code is distributed in the hope that it will be useful,
+ * * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * * GNU AFFERO GENERAL PUBLIC LICENSE for more details.
+ * *
+ * * You should have received a copy of the GNU Affero General Public
+ * * License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * */
+package org.edumfa;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -32,33 +39,33 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import static org.privacyidea.PIConstants.ENDPOINT_AUTH;
-import static org.privacyidea.PIConstants.ENDPOINT_POLLTRANSACTION;
-import static org.privacyidea.PIConstants.ENDPOINT_TOKEN;
-import static org.privacyidea.PIConstants.ENDPOINT_TOKEN_INIT;
-import static org.privacyidea.PIConstants.ENDPOINT_TRIGGERCHALLENGE;
-import static org.privacyidea.PIConstants.ENDPOINT_VALIDATE_CHECK;
-import static org.privacyidea.PIConstants.GENKEY;
-import static org.privacyidea.PIConstants.GET;
-import static org.privacyidea.PIConstants.HEADER_ORIGIN;
-import static org.privacyidea.PIConstants.OTPKEY;
-import static org.privacyidea.PIConstants.PASS;
-import static org.privacyidea.PIConstants.PASSWORD;
-import static org.privacyidea.PIConstants.POST;
-import static org.privacyidea.PIConstants.REALM;
-import static org.privacyidea.PIConstants.SERIAL;
-import static org.privacyidea.PIConstants.TRANSACTION_ID;
-import static org.privacyidea.PIConstants.TYPE;
-import static org.privacyidea.PIConstants.USER;
-import static org.privacyidea.PIConstants.USERNAME;
+import static org.edumfa.EMConstants.ENDPOINT_AUTH;
+import static org.edumfa.EMConstants.ENDPOINT_POLLTRANSACTION;
+import static org.edumfa.EMConstants.ENDPOINT_TOKEN;
+import static org.edumfa.EMConstants.ENDPOINT_TOKEN_INIT;
+import static org.edumfa.EMConstants.ENDPOINT_TRIGGERCHALLENGE;
+import static org.edumfa.EMConstants.ENDPOINT_VALIDATE_CHECK;
+import static org.edumfa.EMConstants.GENKEY;
+import static org.edumfa.EMConstants.GET;
+import static org.edumfa.EMConstants.HEADER_ORIGIN;
+import static org.edumfa.EMConstants.OTPKEY;
+import static org.edumfa.EMConstants.PASS;
+import static org.edumfa.EMConstants.PASSWORD;
+import static org.edumfa.EMConstants.POST;
+import static org.edumfa.EMConstants.REALM;
+import static org.edumfa.EMConstants.SERIAL;
+import static org.edumfa.EMConstants.TRANSACTION_ID;
+import static org.edumfa.EMConstants.TYPE;
+import static org.edumfa.EMConstants.USER;
+import static org.edumfa.EMConstants.USERNAME;
 
 /**
  * This is the main class. It implements the common endpoints such as /validate/check as methods for easy usage.
- * To create an instance of this class, use the nested PrivacyIDEA.Builder class.
+ * To create an instance of this class, use the nested edumfa.Builder class.
  */
-public class PrivacyIDEA implements Closeable
+public class EduMFA implements Closeable
 {
-    private final PIConfig configuration;
+    private final EMConfig configuration;
     private final IPILogger log;
     private final IPISimpleLogger simpleLog;
     private final Endpoint endpoint;
@@ -67,10 +74,10 @@ public class PrivacyIDEA implements Closeable
     private final ThreadPoolExecutor threadPool = new ThreadPoolExecutor(20, 20, 10, TimeUnit.SECONDS, queue);
     final JSONParser parser;
     // Responses from these endpoints will not be logged. The list can be overwritten.
-    private List<String> logExcludedEndpoints = Arrays.asList(PIConstants.ENDPOINT_AUTH,
-                                                              PIConstants.ENDPOINT_POLLTRANSACTION); //Collections.emptyList(); //
+    private List<String> logExcludedEndpoints = Arrays.asList(EMConstants.ENDPOINT_AUTH,
+                                                              EMConstants.ENDPOINT_POLLTRANSACTION); //Collections.emptyList(); //
 
-    private PrivacyIDEA(PIConfig configuration, IPILogger logger, IPISimpleLogger simpleLog)
+    private EduMFA(EMConfig configuration, IPILogger logger, IPISimpleLogger simpleLog)
     {
         this.log = logger;
         this.simpleLog = simpleLog;
@@ -81,65 +88,65 @@ public class PrivacyIDEA implements Closeable
     }
 
     /**
-     * @see PrivacyIDEA#validateCheck(String, String, String, Map)
+     * @see edumfa#validateCheck(String, String, String, Map)
      */
-    public PIResponse validateCheck(String username, String pass)
+    public EMResponse validateCheck(String username, String pass)
     {
         return this.validateCheck(username, pass, null, Collections.emptyMap());
     }
 
     /**
-     * @see PrivacyIDEA#validateCheck(String, String, String, Map)
+     * @see edumfa#validateCheck(String, String, String, Map)
      */
-    public PIResponse validateCheck(String username, String pass, Map<String, String> headers)
+    public EMResponse validateCheck(String username, String pass, Map<String, String> headers)
     {
         return this.validateCheck(username, pass, null, headers);
     }
 
     /**
-     * @see PrivacyIDEA#validateCheck(String, String, String, Map)
+     * @see edumfa#validateCheck(String, String, String, Map)
      */
-    public PIResponse validateCheck(String username, String pass, String transactionId)
+    public EMResponse validateCheck(String username, String pass, String transactionId)
     {
         return this.validateCheck(username, pass, transactionId, Collections.emptyMap());
     }
 
     /**
      * Send a request to validate/check with the given parameters.
-     * Which parameters to send depends on the use case and how privacyIDEA is configured.
+     * Which parameters to send depends on the use case and how edumfa is configured.
      * (E.g. this can also be used to trigger challenges without a service account)
      *
      * @param username      username
      * @param pass          pass/otp value
      * @param transactionId optional, will be appended if set
      * @param headers       optional headers for the request
-     * @return PIResponse object containing the response or null if error
+     * @return EMResponse object containing the response or null if error
      */
-    public PIResponse validateCheck(String username, String pass, String transactionId, Map<String, String> headers)
+    public EMResponse validateCheck(String username, String pass, String transactionId, Map<String, String> headers)
     {
-        return getPIResponse(USER, username, pass, headers, transactionId);
+        return getEMResponse(USER, username, pass, headers, transactionId);
     }
 
     /**
-     * @see PrivacyIDEA#validateCheckSerial(String, String, String, Map)
+     * @see edumfa#validateCheckSerial(String, String, String, Map)
      */
-    public PIResponse validateCheckSerial(String serial, String pass)
+    public EMResponse validateCheckSerial(String serial, String pass)
     {
         return this.validateCheckSerial(serial, pass, null, Collections.emptyMap());
     }
 
     /**
-     * @see PrivacyIDEA#validateCheckSerial(String, String, String, Map)
+     * @see edumfa#validateCheckSerial(String, String, String, Map)
      */
-    public PIResponse validateCheckSerial(String serial, String pass, Map<String, String> headers)
+    public EMResponse validateCheckSerial(String serial, String pass, Map<String, String> headers)
     {
         return this.validateCheckSerial(serial, pass, null, headers);
     }
 
     /**
-     * @see PrivacyIDEA#validateCheckSerial(String, String, String, Map)
+     * @see edumfa#validateCheckSerial(String, String, String, Map)
      */
-    public PIResponse validateCheckSerial(String serial, String pass, String transactionId)
+    public EMResponse validateCheckSerial(String serial, String pass, String transactionId)
     {
         return this.validateCheckSerial(serial, pass, transactionId, Collections.emptyMap());
     }
@@ -150,11 +157,11 @@ public class PrivacyIDEA implements Closeable
      * @param serial        serial of the token
      * @param pass          pass/otp value
      * @param transactionId transactionId
-     * @return PIResponse or null if error
+     * @return EMResponse or null if error
      */
-    public PIResponse validateCheckSerial(String serial, String pass, String transactionId, Map<String, String> headers)
+    public EMResponse validateCheckSerial(String serial, String pass, String transactionId, Map<String, String> headers)
     {
-        return getPIResponse(SERIAL, serial, pass, headers, transactionId);
+        return getEMResponse(SERIAL, serial, pass, headers, transactionId);
     }
 
     /**
@@ -165,9 +172,9 @@ public class PrivacyIDEA implements Closeable
      * @param pass          OTP, PIN+OTP or password to use
      * @param headers       optional headers for the request
      * @param transactionId optional, will be appended if set
-     * @return PIResponse object containing the response or null if error
+     * @return EMResponse object containing the response or null if error
      */
-    private PIResponse getPIResponse(String type, String input, String pass, Map<String, String> headers, String transactionId)
+    private EMResponse getEMResponse(String type, String input, String pass, Map<String, String> headers, String transactionId)
     {
         Map<String, String> params = new LinkedHashMap<>();
         // Add forwarded user or serial to the params
@@ -179,13 +186,13 @@ public class PrivacyIDEA implements Closeable
             params.put(TRANSACTION_ID, transactionId);
         }
         String response = runRequestAsync(ENDPOINT_VALIDATE_CHECK, params, headers, false, POST);
-        return this.parser.parsePIResponse(response);
+        return this.parser.parseEMResponse(response);
     }
 
     /**
-     * @see PrivacyIDEA#validateCheckWebAuthn(String, String, String, String, Map)
+     * @see edumfa#validateCheckWebAuthn(String, String, String, String, Map)
      */
-    public PIResponse validateCheckWebAuthn(String user, String transactionId, String signResponse, String origin)
+    public EMResponse validateCheckWebAuthn(String user, String transactionId, String signResponse, String origin)
     {
         return this.validateCheckWebAuthn(user, transactionId, signResponse, origin, Collections.emptyMap());
     }
@@ -198,9 +205,9 @@ public class PrivacyIDEA implements Closeable
      * @param webAuthnSignResponse the WebAuthnSignResponse as returned from the browser
      * @param origin               server name that was used for
      * @param headers              optional headers for the request
-     * @return PIResponse or null if error
+     * @return EMResponse or null if error
      */
-    public PIResponse validateCheckWebAuthn(String user, String transactionId, String webAuthnSignResponse, String origin, Map<String, String> headers)
+    public EMResponse validateCheckWebAuthn(String user, String transactionId, String webAuthnSignResponse, String origin, Map<String, String> headers)
     {
         Map<String, String> params = new LinkedHashMap<>();
         // Standard validateCheck data
@@ -218,13 +225,13 @@ public class PrivacyIDEA implements Closeable
         hdrs.putAll(headers);
 
         String response = runRequestAsync(ENDPOINT_VALIDATE_CHECK, params, hdrs, false, POST);
-        return this.parser.parsePIResponse(response);
+        return this.parser.parseEMResponse(response);
     }
 
     /**
-     * @see PrivacyIDEA#validateCheckU2F(String, String, String, Map)
+     * @see edumfa#validateCheckU2F(String, String, String, Map)
      */
-    public PIResponse validateCheckU2F(String user, String transactionId, String signResponse)
+    public EMResponse validateCheckU2F(String user, String transactionId, String signResponse)
     {
         return this.validateCheckU2F(user, transactionId, signResponse, Collections.emptyMap());
     }
@@ -235,9 +242,9 @@ public class PrivacyIDEA implements Closeable
      * @param user            username
      * @param transactionId   transactionId
      * @param u2fSignResponse the U2F Sign Response as returned from the browser
-     * @return PIResponse or null if error
+     * @return EMResponse or null if error
      */
-    public PIResponse validateCheckU2F(String user, String transactionId, String u2fSignResponse, Map<String, String> headers)
+    public EMResponse validateCheckU2F(String user, String transactionId, String u2fSignResponse, Map<String, String> headers)
     {
         Map<String, String> params = new LinkedHashMap<>();
         // Standard validateCheck data
@@ -251,13 +258,13 @@ public class PrivacyIDEA implements Closeable
         params.putAll(u2fParams);
 
         String response = runRequestAsync(ENDPOINT_VALIDATE_CHECK, params, headers, false, POST);
-        return this.parser.parsePIResponse(response);
+        return this.parser.parseEMResponse(response);
     }
 
     /**
-     * @see PrivacyIDEA#triggerChallenges(String, Map)
+     * @see edumfa#triggerChallenges(String, Map)
      */
-    public PIResponse triggerChallenges(String username)
+    public EMResponse triggerChallenges(String username)
     {
         return this.triggerChallenges(username, new LinkedHashMap<>());
     }
@@ -269,7 +276,7 @@ public class PrivacyIDEA implements Closeable
      * @param headers  optional headers for the request
      * @return the server response or null if error
      */
-    public PIResponse triggerChallenges(String username, Map<String, String> headers)
+    public EMResponse triggerChallenges(String username, Map<String, String> headers)
     {
         Objects.requireNonNull(username, "Username is required!");
 
@@ -283,7 +290,7 @@ public class PrivacyIDEA implements Closeable
         appendRealm(params);
 
         String response = runRequestAsync(ENDPOINT_TRIGGERCHALLENGE, params, headers, true, POST);
-        return this.parser.parsePIResponse(response);
+        return this.parser.parseEMResponse(response);
     }
 
     /**
@@ -298,8 +305,8 @@ public class PrivacyIDEA implements Closeable
 
         String response = runRequestAsync(ENDPOINT_POLLTRANSACTION, Collections.singletonMap(TRANSACTION_ID, transactionId), Collections.emptyMap(),
                                           false, GET);
-        PIResponse piresponse = this.parser.parsePIResponse(response);
-        return piresponse.value;
+        EMResponse EMResponse = this.parser.parseEMResponse(response);
+        return EMResponse.value;
     }
 
     /**
@@ -419,7 +426,7 @@ public class PrivacyIDEA implements Closeable
      * Run a request in a thread of the thread pool. Then join that thread to the one that was calling this method.
      * If the server takes longer to answer a request, the other requests do not have to wait.
      *
-     * @param path              path to the endpoint of the privacyIDEA server
+     * @param path              path to the endpoint of the edumfa server
      * @param params            request parameters
      * @param headers           request headers
      * @param authTokenRequired whether an auth token should be acquired prior to the request
@@ -464,7 +471,7 @@ public class PrivacyIDEA implements Closeable
                !configuration.serviceAccountPass.isEmpty();
     }
 
-    PIConfig configuration()
+    EMConfig configuration()
     {
         return configuration;
     }
@@ -572,9 +579,9 @@ public class PrivacyIDEA implements Closeable
     }
 
     /**
-     * Get a new Builder to create a PrivacyIDEA instance.
+     * Get a new Builder to create a edumfa instance.
      *
-     * @param serverURL url of the privacyIDEA server.
+     * @param serverURL url of the edumfa server.
      * @param userAgent userAgent of the plugin using the java-client.
      * @return Builder
      */
@@ -598,8 +605,8 @@ public class PrivacyIDEA implements Closeable
         private int httpTimeoutMs = 30000;
 
         /**
-         * @param serverURL the server URL is mandatory to communicate with privacyIDEA.
-         * @param userAgent the user agent that should be used in the http requests. Should refer to the plugin, something like "privacyIDEA-Keycloak"
+         * @param serverURL the server URL is mandatory to communicate with edumfa.
+         * @param userAgent the user agent that should be used in the http requests. Should refer to the plugin, something like "edumfa-Keycloak"
          */
         private Builder(String serverURL, String userAgent)
         {
@@ -706,9 +713,9 @@ public class PrivacyIDEA implements Closeable
             return this;
         }
 
-        public PrivacyIDEA build()
+        public EduMFA build()
         {
-            PIConfig configuration = new PIConfig(serverURL, userAgent);
+            EMConfig configuration = new EMConfig(serverURL, userAgent);
             configuration.realm = realm;
             configuration.doSSLVerify = doSSLVerify;
             configuration.serviceAccountName = serviceAccountName;
@@ -716,7 +723,7 @@ public class PrivacyIDEA implements Closeable
             configuration.serviceAccountRealm = serviceAccountRealm;
             configuration.disableLog = disableLog;
             configuration.httpTimeoutMs = httpTimeoutMs;
-            return new PrivacyIDEA(configuration, logger, simpleLogBridge);
+            return new EduMFA(configuration, logger, simpleLogBridge);
         }
     }
 }

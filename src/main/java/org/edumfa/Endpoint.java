@@ -1,20 +1,27 @@
 /*
- * Copyright 2023 NetKnights GmbH - nils.behlen@netknights.it
- * lukas.matusiewicz@netknights.it
- * - Modified
- * <p>
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License here:
- * <a href="http://www.apache.org/licenses/LICENSE-2.0">License</a>
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package org.privacyidea;
+ * * License:  AGPLv3
+ * * This file is part of eduMFA java client. eduMFA java client is a fork of privacyIDEA java client.
+ * * Copyright (c) 2024 eduMFA Project-Team
+ * * Previous authors of the PrivacyIDEA java client:
+ * *
+ * * NetKnights GmbH
+ * * nils.behlen@netknights.it
+ * * lukas.matusiewicz@netknights.it
+ * *
+ * * This code is free software; you can redistribute it and/or
+ * * modify it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE
+ * * License as published by the Free Software Foundation; either
+ * * version 3 of the License, or any later version.
+ * *
+ * * This code is distributed in the hope that it will be useful,
+ * * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * * GNU AFFERO GENERAL PUBLIC LICENSE for more details.
+ * *
+ * * You should have received a copy of the GNU Affero General Public
+ * * License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * */
+package org.edumfa;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -34,18 +41,18 @@ import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
-import static org.privacyidea.PIConstants.GET;
-import static org.privacyidea.PIConstants.HEADER_USER_AGENT;
-import static org.privacyidea.PIConstants.POST;
-import static org.privacyidea.PIConstants.WEBAUTHN_PARAMETERS;
+import static org.edumfa.EMConstants.GET;
+import static org.edumfa.EMConstants.HEADER_USER_AGENT;
+import static org.edumfa.EMConstants.POST;
+import static org.edumfa.EMConstants.WEBAUTHN_PARAMETERS;
 
 /**
  * This class handles sending requests to the server.
  */
 class Endpoint
 {
-    private final PrivacyIDEA privacyIDEA;
-    private final PIConfig piconfig;
+    private final EduMFA eduMFA;
+    private final EMConfig EMConfig;
     private final OkHttpClient client;
 
     final TrustManager[] trustAllManager = new TrustManager[]{new X509TrustManager()
@@ -67,17 +74,17 @@ class Endpoint
         }
     }};
 
-    Endpoint(PrivacyIDEA privacyIDEA)
+    Endpoint(EduMFA eduMFA)
     {
-        this.privacyIDEA = privacyIDEA;
-        this.piconfig = privacyIDEA.configuration();
+        this.eduMFA = eduMFA;
+        this.EMConfig = eduMFA.configuration();
 
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
-        builder.connectTimeout(piconfig.httpTimeoutMs, TimeUnit.MILLISECONDS)
-               .writeTimeout(piconfig.httpTimeoutMs, TimeUnit.MILLISECONDS)
-               .readTimeout(piconfig.httpTimeoutMs, TimeUnit.MILLISECONDS);
+        builder.connectTimeout(EMConfig.httpTimeoutMs, TimeUnit.MILLISECONDS)
+               .writeTimeout(EMConfig.httpTimeoutMs, TimeUnit.MILLISECONDS)
+               .readTimeout(EMConfig.httpTimeoutMs, TimeUnit.MILLISECONDS);
 
-        if (!this.piconfig.doSSLVerify)
+        if (!this.EMConfig.doSSLVerify)
         {
             // Trust all certs and verify every host
             try
@@ -90,7 +97,7 @@ class Endpoint
             }
             catch (KeyManagementException | NoSuchAlgorithmException e)
             {
-                privacyIDEA.error(e);
+                eduMFA.error(e);
             }
         }
         this.client = builder.build();
@@ -108,16 +115,16 @@ class Endpoint
     void sendRequestAsync(String endpoint, Map<String, String> params, Map<String, String> headers, String method,
                           Callback callback)
     {
-        HttpUrl httpUrl = HttpUrl.parse(piconfig.serverURL + endpoint);
+        HttpUrl httpUrl = HttpUrl.parse(EMConfig.serverURL + endpoint);
         if (httpUrl == null)
         {
-            privacyIDEA.error("Server url could not be parsed: " + (piconfig.serverURL + endpoint));
+            eduMFA.error("Server url could not be parsed: " + (EMConfig.serverURL + endpoint));
             // Invoke the callback to terminate the thread that called this function.
             callback.onFailure(null, new IOException("Request could not be created because the url could not be parsed"));
             return;
         }
         HttpUrl.Builder urlBuilder = httpUrl.newBuilder();
-        privacyIDEA.log(method + " " + endpoint);
+        eduMFA.log(method + " " + endpoint);
         params.forEach((k, v) ->
                        {
                            if (k.equals("pass") || k.equals("password"))
@@ -125,7 +132,7 @@ class Endpoint
                                v = "*".repeat(v.length());
                            }
 
-                           privacyIDEA.log(k + "=" + v);
+                           eduMFA.log(k + "=" + v);
                        });
 
         if (GET.equals(method))
@@ -138,11 +145,11 @@ class Endpoint
         }
 
         String url = urlBuilder.build().toString();
-        //privacyIDEA.log("URL: " + url);
+        //eduMFA.log("URL: " + url);
         Request.Builder requestBuilder = new Request.Builder().url(url);
 
         // Add the headers
-        requestBuilder.addHeader(HEADER_USER_AGENT, piconfig.userAgent);
+        requestBuilder.addHeader(HEADER_USER_AGENT, EMConfig.userAgent);
         if (headers != null && !headers.isEmpty())
         {
             headers.forEach(requestBuilder::addHeader);
@@ -170,7 +177,7 @@ class Endpoint
         }
 
         Request request = requestBuilder.build();
-        //privacyIDEA.log("HEADERS:\n" + request.headers().toString());
+        //eduMFA.log("HEADERS:\n" + request.headers().toString());
         client.newCall(request).enqueue(callback);
     }
 }

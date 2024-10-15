@@ -1,20 +1,27 @@
 /*
- * Copyright 2023 NetKnights GmbH - nils.behlen@netknights.it
- * lukas.matusiewicz@netknights.it
- * - Modified
- * <p>
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License here:
- * <a href="http://www.apache.org/licenses/LICENSE-2.0">License</a>
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package org.privacyidea;
+ * * License:  AGPLv3
+ * * This file is part of eduMFA java client. eduMFA java client is a fork of privacyIDEA java client.
+ * * Copyright (c) 2024 eduMFA Project-Team
+ * * Previous authors of the PrivacyIDEA java client:
+ * *
+ * * NetKnights GmbH
+ * * nils.behlen@netknights.it
+ * * lukas.matusiewicz@netknights.it
+ * *
+ * * This code is free software; you can redistribute it and/or
+ * * modify it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE
+ * * License as published by the Free Software Foundation; either
+ * * version 3 of the License, or any later version.
+ * *
+ * * This code is distributed in the hope that it will be useful,
+ * * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * * GNU AFFERO GENERAL PUBLIC LICENSE for more details.
+ * *
+ * * You should have received a copy of the GNU Affero General Public
+ * * License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * */
+package org.edumfa;
 
 import java.util.List;
 import org.junit.After;
@@ -33,7 +40,7 @@ import static org.junit.Assert.assertTrue;
 public class TestGetTokenInfo
 {
     private ClientAndServer mockServer;
-    private PrivacyIDEA privacyIDEA;
+    private EduMFA eduMFA;
     private final String username = "Test";
     private final String authToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicmVhbG0iOiIiLCJub25jZSI6IjVjOTc4NWM5OWU";
     private final String serviceAccount = "admin";
@@ -45,13 +52,13 @@ public class TestGetTokenInfo
     {
         mockServer = ClientAndServer.startClientAndServer(1080);
 
-        privacyIDEA = PrivacyIDEA.newBuilder("https://127.0.0.1:1080", "test")
+        eduMFA = EduMFA.newBuilder("https://127.0.0.1:1080", "test")
                                  .serviceAccount(serviceAccount, servicePassword)
                                  .serviceRealm(serviceRealm)
                                  .disableLog()
                                  .httpTimeoutMs(15000)
                                  .sslVerify(false)
-                                 .logger(new PILogImplementation())
+                                 .logger(new EMLogImplementation())
                                  .build();
     }
 
@@ -59,7 +66,7 @@ public class TestGetTokenInfo
     public void testSuccess()
     {
         mockServer.when(HttpRequest.request()
-                                   .withPath(PIConstants.ENDPOINT_AUTH)
+                                   .withPath(EMConstants.ENDPOINT_AUTH)
                                    .withMethod("POST")
                                    .withBody("username=" + serviceAccount + "&password=" + servicePassword + "&realm=" + serviceRealm))
                   .respond(HttpResponse.response()
@@ -69,10 +76,10 @@ public class TestGetTokenInfo
         mockServer.when(HttpRequest.request()
                                    .withMethod("GET")
                                    .withQueryStringParameter("user", username)
-                                   .withPath(PIConstants.ENDPOINT_TOKEN)
+                                   .withPath(EMConstants.ENDPOINT_TOKEN)
                                    .withHeader("Authorization", authToken)).respond(HttpResponse.response().withBody(Utils.getTokenResponse()));
 
-        List<TokenInfo> tokenInfoList = privacyIDEA.getTokenInfo(username);
+        List<TokenInfo> tokenInfoList = eduMFA.getTokenInfo(username);
         assertNotNull(tokenInfoList);
         assertEquals(tokenInfoList.size(), 1);
 
@@ -97,7 +104,7 @@ public class TestGetTokenInfo
         assertEquals("defrealm", tokenInfo.userRealm);
         assertEquals("Test", tokenInfo.username);
 
-        assertEquals(authToken, privacyIDEA.getAuthToken());
+        assertEquals(authToken, eduMFA.getAuthToken());
     }
 
     @Test
@@ -106,24 +113,24 @@ public class TestGetTokenInfo
         mockServer.when(HttpRequest.request()
                                    .withMethod("GET")
                                    .withQueryStringParameter("user", "Test")
-                                   .withPath(PIConstants.ENDPOINT_TOKEN)
+                                   .withPath(EMConstants.ENDPOINT_TOKEN)
                                    .withHeader("Authorization", authToken))
                   .respond(HttpResponse.response().withBody(Utils.getTokenNoTokenResponse()));
 
-        List<TokenInfo> tokenInfoList = privacyIDEA.getTokenInfo(username);
+        List<TokenInfo> tokenInfoList = eduMFA.getTokenInfo(username);
         assertNull(tokenInfoList);
     }
 
     @Test
     public void testNoServiceAccount()
     {
-        privacyIDEA = PrivacyIDEA.newBuilder("https://127.0.0.1:1080", "test").sslVerify(false).logger(new PILogImplementation()).build();
+        eduMFA = EduMFA.newBuilder("https://127.0.0.1:1080", "test").sslVerify(false).logger(new EMLogImplementation()).build();
 
-        List<TokenInfo> tokenInfoList = privacyIDEA.getTokenInfo(username);
+        List<TokenInfo> tokenInfoList = eduMFA.getTokenInfo(username);
 
         assertNull(tokenInfoList);
 
-        assertNull(privacyIDEA.getAuthToken());
+        assertNull(eduMFA.getAuthToken());
     }
 
     @After
